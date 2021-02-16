@@ -1,16 +1,11 @@
-import sys
 import pandas as pd
 import os
-from pckgs.models import get_model_mlp, get_model_lstm, \
-    train_model, get_model_cnn
+from pckgs.models import get_model_lstm, train_model
 from pckgs.price_preprocess import PricePreprocess
 import math
-import numpy as np
-import argparse
 import matplotlib.pyplot as plt
 import seaborn as sb
 from pckgs.helper import reduce
-import pickle
 
 
 datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather', 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}

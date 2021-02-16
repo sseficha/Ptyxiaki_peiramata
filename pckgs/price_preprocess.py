@@ -1,10 +1,6 @@
 import pandas as pd
-import datetime
-import seaborn as sb
-import matplotlib.pyplot as plt
 from pckgs.helper import reduce
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from math import exp
 
 
 class PricePreprocess:

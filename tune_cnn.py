@@ -10,7 +10,6 @@ import argparse
 import matplotlib.pyplot as plt
 import seaborn as sb
 from pckgs.helper import reduce
-import pickle
 
 
 datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather', 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}

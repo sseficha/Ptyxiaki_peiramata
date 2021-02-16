@@ -1,5 +1,4 @@
 import pandas as pd
-from plotly import graph_objs as go
 from sklearn.metrics import confusion_matrix
 import seaborn as sb
 import matplotlib.pyplot as plt
