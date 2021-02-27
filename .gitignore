@@ -1,2 +1,7 @@
 .idea/
 pickles/
+__pycache__/
+Pipfile
+dummy.py
+env/
+fin_utils-master/

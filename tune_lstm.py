@@ -1,5 +1,9 @@
 import pandas as pd
 import os
+
+#os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+#os.environ["CUDA_VISIBLE_DEVICES"]="0,1"  # specify which GPU(s) to be used
+
 from pckgs.models import get_model_lstm, train_model
 from pckgs.price_preprocess import PricePreprocess
 import math
@@ -8,7 +12,7 @@ import seaborn as sb
 from pckgs.helper import reduce
 
 
-datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather', 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}
+datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather'}#, 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}
 
 # run for btc and eth
 for coin in datasets:
@@ -28,11 +32,13 @@ for coin in datasets:
     ###params
     problems = ['p', 's', 'ps']
     thresholds = [0.2, 0.5, 0.7]
-    layers = [1,2]
-    neurons = [8, 16, 32, 64]
+    layers = [1,2,3]
+    neurons = [8, 16, 32, 64,128]
     lrs = [1e-2, 1e-3, 1e-4]
-    decays = [1e-2, 1e-3, 1e-4, 1e-5]
-    columns = ['problem', 'threshold','layers','neurons', 'lr','decay',   'acc','val_acc','loss','val_loss','pnl','val_pnl']
+    dropouts = [0.1, 0.2, 0.4]
+
+    
+    columns = ['problem', 'threshold','layers','neurons', 'lr','dropout',   'acc','val_acc','loss','val_loss','pnl','val_pnl']
     ###
     grouped_res = pd.DataFrame(columns=columns)
 
@@ -74,16 +80,16 @@ for coin in datasets:
             for layer in layers:
                 for neuron in neurons:
                     for lr in lrs:
-                        for decay in decays:
+                        for dropout in dropouts:
                             res = {}
                             path = 'pickles/{}/lstm/{}/'.format(coin, problem)
-                            name = 'threshold{}_layers{}_neurons{}_lr{}_decay{}'.format(threshold,layer,neuron, lr, decay)
+                            name = 'threshold{}_layers{}_neurons{}_lr{}_dropout{}'.format(threshold,layer,neuron, lr, dropout)
                             pathname_pic = path+name+'.png'
                             try:
                                 os.makedirs(path)
                             except OSError:
                                 pass
-                            model = get_model_lstm(layer, neuron, lr, decay)
+                            model = get_model_lstm(layer, neuron, lr, dropout)
                             history, pnl_test, pnl_train, pnls_test, pnls_train = train_model(model, (x_train, x_test, y_train, y_test),
                                                                                          train_candle, test_candle,
                                                                                           epochs=400)
@@ -93,7 +99,7 @@ for coin in datasets:
                             res['val_pnl'] = pnl_test
 
 
-                            temp = pd.Series([problem, threshold, layer, neuron, lr, decay,
+                            temp = pd.Series([problem, threshold, layer, neuron, lr, dropout,
                                           max(history.history['accuracy']), max(history.history['val_accuracy']),
                                           min(history.history['loss']), min(history.history['val_loss']),
                                           max(pnl_train), max(pnl_test)],

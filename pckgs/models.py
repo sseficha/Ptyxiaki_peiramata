@@ -10,13 +10,14 @@ from tensorflow.keras.models import load_model
 from pckgs.helper import PnlCallback
 
 
-def get_model_lstm(layer, neuron, lr, decay):
+def get_model_lstm(layer, neuron, lr, dropout):
     model = Sequential()
     for i in range(layer):
-        if i==0 and layer >1:
-            model.add(LSTM(neuron, return_sequences=True, activation='relu', kernel_regularizer=l2(decay)))
+        if i<layer-1:
+            model.add(LSTM(neuron, return_sequences=True))
         else:
-            model.add(LSTM(neuron, activation='relu', kernel_regularizer=l2(decay)))
+            model.add(LSTM(neuron))
+        model.add(Dropout(dropout))
 
     model.add(Dense(3, activation='softmax'))
     model.compile(loss=CategoricalCrossentropy(label_smoothing=0.1), metrics=['accuracy'], optimizer=Adam(learning_rate=lr))
@@ -33,11 +34,11 @@ def get_model_mlp(layer,neuron,lr,dropout):
     return model
 
 
-def get_model_cnn(layer, filter, kernel, lr, pooling):
+def get_model_cnn(layer, filter, kernel, lr, dropout):
     model = Sequential()
     for i in range(layer):
         model.add(Conv1D(filters=filter, kernel_size=kernel, activation='relu'))
-        model.add(MaxPooling1D(pooling))
+        model.add(Dropout(dropout))
     model.add(Flatten())
     model.add(Dense(3, activation='softmax'))
     model.compile(loss=CategoricalCrossentropy(label_smoothing=0.1), metrics=['accuracy'], optimizer=Adam(learning_rate=lr))
@@ -66,7 +67,6 @@ def get_model_both_emb():
 
 
 import tensorflow.keras.backend as K
-from pckgs.helper import ModelSave
 
 def train_model(model, data, train_candle, test_candle, epochs=200, verbose=0):
     f_lr = K.eval(model.optimizer.lr) * 0.1
@@ -78,9 +78,10 @@ def train_model(model, data, train_candle, test_candle, epochs=200, verbose=0):
 
     pnl = PnlCallback(x_test, test_candle, x_train, train_candle)
     sched = LearningRateScheduler(scheduler)
+    
 
     history = model.fit(x=x_train, y=y_train, validation_data=(x_test, y_test), batch_size=32,
-                        epochs=epochs, verbose=verbose, callbacks=[pnl, sched])
+                epochs=epochs, verbose=verbose, callbacks=[pnl, sched])
 
     return history, pnl.stats_test, pnl.stats_train, pnl.pnls_test, pnl.pnls_train
 

@@ -12,7 +12,7 @@ import seaborn as sb
 from pckgs.helper import reduce
 
 
-datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather', 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}
+datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather'}#, 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}
 
 # run for btc and eth
 for coin in datasets:
@@ -33,11 +33,11 @@ for coin in datasets:
     problems = ['p', 's', 'ps']
     thresholds = [0.2, 0.5, 0.7]
     layers = [1,2,3 ]
-    filters = [4, 8, 16, 32]
+    filters = [4, 8, 16]
     kernels = [3,4,5]
     lrs = [1e-2, 1e-3, 1e-4]
-    poolings = [2,3,4]
-    columns = ['problem', 'threshold','layers','filters', 'kernel', 'lr','pooling',   'acc','val_acc','loss','val_loss','pnl','val_pnl']
+    dropouts = [0.1, 0.2, 0.4]
+    columns = ['problem', 'threshold','layers','filters', 'kernel', 'lr','dropout',   'acc','val_acc','loss','val_loss','pnl','val_pnl']
     ###
     grouped_res = pd.DataFrame(columns=columns)
 
@@ -80,16 +80,16 @@ for coin in datasets:
                 for filter in filters:
                     for kernel in kernels:
                         for lr in lrs:
-                            for pooling in poolings:
+                            for dropout in dropouts:
                                 res = {}
                                 path = 'pickles/{}/cnn/{}/'.format(coin, problem)
-                                name = 'threshold{}_layers{}_filters{}_kernel{}_lr{}_pooling{}'.format(threshold,layer,filter,kernel, lr, pooling)
+                                name = 'threshold{}_layers{}_filters{}_kernel{}_lr{}_dropout{}'.format(threshold,layer,filter,kernel, lr, dropout)
                                 pathname_pic = path+name+'.png'
                                 try:
                                     os.makedirs(path)
                                 except OSError:
                                     pass
-                                model = get_model_cnn(layer, filter,kernel, lr, pooling)
+                                model = get_model_cnn(layer, filter,kernel, lr, dropout)
                                 history, pnl_test, pnl_train, pnls_test, pnls_train = train_model(model, (x_train, x_test, y_train, y_test),
                                                                                              train_candle, test_candle,
                                                                                               epochs=400)
@@ -99,7 +99,7 @@ for coin in datasets:
                                 res['val_pnl'] = pnl_test
 
 
-                                temp = pd.Series([problem, threshold, layer, filter,kernel, lr, pooling,
+                                temp = pd.Series([problem, threshold, layer, filter,kernel, lr, dropout,
                                               max(history.history['accuracy']), max(history.history['val_accuracy']),
                                               min(history.history['loss']), min(history.history['val_loss']),
                                               max(pnl_train), max(pnl_test)],

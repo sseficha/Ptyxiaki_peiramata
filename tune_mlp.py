@@ -8,7 +8,7 @@ import seaborn as sb
 from pckgs.helper import reduce
 
 
-datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather', 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}
+datasets = {'btc':'./Price/datasets/coinbase_day_candles/BTC-USD.feather'}#, 'eth':'./Price/datasets/coinbase_day_candles/ETH-USD.feather'}
 
 # run for btc and eth
 for coin in datasets:
