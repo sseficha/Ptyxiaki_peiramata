@@ -1,5 +1,6 @@
 .idea/
 pickles/
+pickles2/
 __pycache__/
 Pipfile
 dummy.py
